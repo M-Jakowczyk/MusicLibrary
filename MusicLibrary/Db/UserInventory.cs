@@ -6,7 +6,7 @@ namespace MusicLibrary.Db;
 public class UserInventory
 {
 
-    private string _connectionString = "Server=.;Database=Test;Trusted_Connection=True;";
+    private string _connectionString = "Server=ROG;Database=MusicLibrary;Trusted_Connection=True;";
     public void CreateNewUser(User user)
     {
         var query = $"INSERT INTO User VALUES('{user.Email}', '{user.Password}', '{user.UserType}')";

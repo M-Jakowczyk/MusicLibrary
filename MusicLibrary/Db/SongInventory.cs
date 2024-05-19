@@ -5,8 +5,8 @@ namespace MusicLibrary.Db;
 
 public class SongInventory
 {
-    private string _connectionString = "Server=.;Database=Test;Trusted_Connection=True;";
-    
+    private string _connectionString = "Server=ROG;Database=MusicLibrary;Trusted_Connection=True;";
+
     public void AddNewSongToDb(Song song)
         {
             //Insert into Song values('Title 1', 2024, 'Author 1')
