@@ -9,6 +9,12 @@ public class User
         UserType = userType;
     }
 
+    public User(int id, string email, string password, UserType userType)
+    : this(email, password, userType)
+    {
+            Id = id;
+    }
+
     public int Id { get; }
     public string Email { get; }
     public string Password { get; }

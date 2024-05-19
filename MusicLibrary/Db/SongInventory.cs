@@ -12,7 +12,7 @@ public class SongInventory
             //Insert into Song values('Title 1', 2024, 'Author 1')
             var query = $"Insert into Song values('{song.Title}', {song.Year}, '{song.Author}')";
 
-            CheangDb(query);
+            ChangDb(query);
         }
 
         public void DeleteSongByTitle(string title)
@@ -20,7 +20,7 @@ public class SongInventory
             //Insert into Song values('Title 1', 2024, 'Author 1')
             var query = $"DELETE FROM Song WHERE Title = '{title}';";
 
-            CheangDb(query);
+            ChangDb(query);
         }
 
         public Song[] GetAllSongs()
@@ -93,7 +93,7 @@ public class SongInventory
 
 
 
-        private void CheangDb(string query)
+        private void ChangDb(string query)
         {
             var sqlConnection = new SqlConnection(_connectionString);
             sqlConnection.Open();
