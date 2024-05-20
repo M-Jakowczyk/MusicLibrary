@@ -1,4 +1,4 @@
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using MusicLibrary.Models;
 
 namespace MusicLibrary.Db;
@@ -9,25 +9,25 @@ public class UserInventory
     private string _connectionString = "Server=ROG;Database=MusicLibrary;Trusted_Connection=True;";
     public void CreateNewUser(User user)
     {
-        var query = $"INSERT INTO User VALUES('{user.Email}', '{user.Password}', '{user.UserType}')";
+        var query = $"INSERT INTO Users VALUES('{user.Email}', '{user.Password}', '{(int)user.UserType}')";
         ChangDb(query);
     }
 
     public void DeleteByEmail(string email)
     {
-        var query = $"DELETE FROM User WHERE Title = '{email}';";
+        var query = $"DELETE FROM Users WHERE Email = '{email}';";
         ChangDb(query);
     }
 
     public void UpdateUser(User user, int userId)
     {
-        var query = $"UPDATE User SET Email = {user.Email}, Password = {user.Password}, UserType = {user.UserType} WHERE Id = userId; ";
+        var query = $"UPDATE Users SET Email = {user.Email}, Password = {user.Password}, Type = {user.UserType} WHERE ID = userId; ";
         ChangDb(query);
     }
 
     public User[] GetAllUsers()
     {
-        var query = "SELECT * FROM User";
+        var query = "SELECT * FROM Users";
         var result = SelectFromDb(query);
 
         return result;
@@ -35,7 +35,7 @@ public class UserInventory
 
     public User GetUserByEmail(string email)
     {
-        var query = $"SELECT * FROM User WHERE Email = '{email}'";
+        var query = $"SELECT * FROM Users WHERE Email = '{email}'";
         var result = SelectFromDb(query);
 
         return result[0];
@@ -49,7 +49,7 @@ public class UserInventory
 
     public bool UserExistByEmail(string email)
     {
-        var query = $"SELECT * FROM User WHERE Email = '{email}'";
+        var query = $"SELECT * FROM Users WHERE Email = '{email}'";
         var result = SelectFromDb(query);
 
         return result.Length != 0;
@@ -80,12 +80,12 @@ public class UserInventory
 
         while (reader.Read())
         {
-            var id = reader["Id"].ToString();
+            var id = reader["ID"].ToString();
             var email = reader["Email"].ToString();
             var password = reader["Password"].ToString();
-            var userType = reader["UserType"].ToString();
+            var userType = reader["Type"].ToString();
 
-            var user = new User(int.Parse(id), email, password, (UserType)Enum.Parse(typeof(UserType), userType, true));
+            var user = new User(int.Parse(id), email, password, (UserType)Enum.ToObject(typeof(UserType), int.Parse(userType)));
             Array.Resize(ref result, result.Length + 1);
             result[result.Length - 1] = user;
         }

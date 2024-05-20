@@ -1,5 +1,5 @@
-using Microsoft.Data.SqlClient;
 using MusicLibrary.Models;
+using System.Data.SqlClient;
 
 namespace MusicLibrary.Db;
 
@@ -10,7 +10,7 @@ public class SongInventory
     public void AddNewSongToDb(Song song)
         {
             //Insert into Song values('Title 1', 2024, 'Author 1')
-            var query = $"Insert into Song values('{song.Title}', {song.Year}, '{song.Author}')";
+            var query = $"Insert into Songs values('{song.Title}', {song.Year}, '{song.Author}')";
 
             ChangDb(query);
         }
@@ -18,7 +18,7 @@ public class SongInventory
         public void DeleteSongByTitle(string title)
         {
             //Insert into Song values('Title 1', 2024, 'Author 1')
-            var query = $"DELETE FROM Song WHERE Title = '{title}';";
+            var query = $"DELETE FROM Songs WHERE Title = '{title}';";
 
             ChangDb(query);
         }
@@ -28,7 +28,7 @@ public class SongInventory
             var result = new Song[0];
             //var result = new List<Song>();
 
-            var query = "Select * from Song";
+            var query = "Select * from Songs";
 
             var sqlConnection = new SqlConnection(_connectionString);
             sqlConnection.Open();
@@ -62,7 +62,7 @@ public class SongInventory
             var result = new Song[0];
             //var result = new List<Song>();
 
-            var query = $"Select * from Song where Author = '{authorInDb}'";
+            var query = $"Select * from Songs where Author = '{authorInDb}'";
 
             var sqlConnection = new SqlConnection(_connectionString);
             sqlConnection.Open();

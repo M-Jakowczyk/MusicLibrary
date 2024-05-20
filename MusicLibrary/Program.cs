@@ -1,6 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using Microsoft.Data.SqlClient;
+using System.Data.SqlClient;
 using MusicLibrary;
 using MusicLibrary.Db;
 using MusicLibrary.Models;
@@ -12,16 +12,8 @@ Start();
 static void Start()
 {
     Console.WriteLine("Hello, SongLibrary!");
-    CheckDbConnection();
+    SetupDb.Start();
     Menu menu = new Menu();
     menu.MainMenu();
 }
 
-static void CheckDbConnection()
-{
-    string _connectionString = "Server=ROG;Database=MusicLibrary;Trusted_Connection=True;";
-    var sqlConnection = new SqlConnection(_connectionString);
-    var flag = sqlConnection.StatisticsEnabled;
-    if (flag) Console.WriteLine("Database connected...");
-    Console.WriteLine("Problem with database connection...");
-}
