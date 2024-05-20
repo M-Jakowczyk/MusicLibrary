@@ -7,93 +7,59 @@ public class SongInventory
 {
     private string _connectionString = "Server=ROG;Database=MusicLibrary;Trusted_Connection=True;";
 
-    public void AddNewSongToDb(Song song)
-        {
-            //Insert into Song values('Title 1', 2024, 'Author 1')
-            var query = $"Insert into Songs values('{song.Title}', {song.Year}, '{song.Author}')";
+    public int AddNewSongToDb(Song song)
+    {
+        var query = $"Insert into Songs values('{song.Title}', '{song.Author}', '{song.Album}', {song.Year})";
+        ChangDb(query);
+        return GetSongID(song);
+    }
 
-            ChangDb(query);
-        }
+    private int GetSongID(Song song)
+    {
+        var query = $"SELECT * FROM Songs WHERE (Title = '{song.Title}' AND Author = '{song.Author}' AND Album = '{song.Album}' AND Year = {song.Year} )";
+        return SelectFromDb(query)[0].Id;
+    }
+    public Song GetSongByID(int id)
+    {
+        var query = $"SELECT * FROM Songs WHERE ID = {id}";
+        return SelectFromDb(query)[0];
+    }
+    public void DeleteSongByID(int songID)
+    {
+        var query = $"DELETE FROM Songs WHERE ID = {songID};";
+        ChangDb(query);
+    }
 
-        public void DeleteSongByTitle(string title)
-        {
-            //Insert into Song values('Title 1', 2024, 'Author 1')
-            var query = $"DELETE FROM Songs WHERE Title = '{title}';";
+    public void UpdateSong(Song song, int songID)
+    {
+        var query = $"UPDATE Users SET Title = '{song.Title}', Author = '{song.Author}', Album = '{song.Album}', Year = {song.Year} WHERE ID = songID; ";
+        ChangDb(query);
+    }
 
-            ChangDb(query);
-        }
+    public Song[] GetAllSongs()
+    {
+        var query = "Select * from Songs";
+        var result = SelectFromDb(query);
 
-        public Song[] GetAllSongs()
-        {
-            var result = new Song[0];
-            //var result = new List<Song>();
+        return result.ToArray();
+    }
 
-            var query = "Select * from Songs";
+    public Song[] GetSongsByAuthor(string authorInDb)
+    {
+        var query = $"Select * from Songs where Author = '{authorInDb}'";
+        var result = SelectFromDb(query);
 
-            var sqlConnection = new SqlConnection(_connectionString);
-            sqlConnection.Open();
+        return result.ToArray();
+    }
 
-            var sqlCommand = new SqlCommand(query, sqlConnection);
+    internal Song[] GetSongsByUser(int[] songIDs)
+    {
+        var query = $"SELECT * FROM Songs WHERE ID IN '{songIDs}' ";
+        var result = SelectFromDb(query);
+        return result.ToArray();
+    }
 
-            var reader = sqlCommand.ExecuteReader();
-
-            while (reader.Read())
-            {
-                var id = reader["Id"].ToString();
-                var title = reader["Title"].ToString();
-                var year = reader["Year"].ToString();
-                var author = reader["Author"].ToString();
-
-                var song = new Song(int.Parse(id), title, author, "", int.Parse(year));
-
-                Array.Resize(ref result, result.Length + 1);
-                result[result.Length - 1] = song;
-                //result.Add(song);
-            }
-
-            sqlCommand.Dispose();
-            sqlConnection.Dispose();
-
-            return result.ToArray();
-        }
-
-        public Song[] GetSongsByAuthor(string authorInDb)
-        {
-            var result = new Song[0];
-            //var result = new List<Song>();
-
-            var query = $"Select * from Songs where Author = '{authorInDb}'";
-
-            var sqlConnection = new SqlConnection(_connectionString);
-            sqlConnection.Open();
-
-            var sqlCommand = new SqlCommand(query, sqlConnection);
-
-            var reader = sqlCommand.ExecuteReader();
-
-            while (reader.Read())
-            {
-                var id = reader["Id"].ToString();
-                var title = reader["Title"].ToString();
-                var year = reader["Year"].ToString();
-                var author = reader["Author"].ToString();
-
-                var song = new Song(int.Parse(id), title, author, "", int.Parse(year) );
-
-                Array.Resize(ref result, result.Length + 1);
-                result[result.Length - 1] = song;
-                //result.Add(song);
-            }
-
-            sqlCommand.Dispose();
-            sqlConnection.Dispose();
-
-            return result.ToArray();
-        }
-
-
-
-        private void ChangDb(string query)
+    private void ChangDb(string query)
         {
             var sqlConnection = new SqlConnection(_connectionString);
             sqlConnection.Open();
@@ -105,5 +71,33 @@ public class SongInventory
             sqlCommand.Dispose();
             sqlConnection.Dispose();
         }
+    private Song[] SelectFromDb(string query)
+    {
+        var result = new Song[0];
+        var sqlConnection = new SqlConnection(_connectionString);
+        sqlConnection.Open();
+
+        var sqlCommand = new SqlCommand(query, sqlConnection);
+
+        var reader = sqlCommand.ExecuteReader();
+
+        while (reader.Read())
+        {
+            var id = reader["Id"].ToString();
+            var title = reader["Title"].ToString();
+            var year = reader["Year"].ToString();
+            var author = reader["Author"].ToString();
+
+            var song = new Song(int.Parse(id), title, author, "", int.Parse(year));
+
+            Array.Resize(ref result, result.Length + 1);
+            result[result.Length - 1] = song;
+        }
+
+        sqlCommand.Dispose();
+        sqlConnection.Dispose();
+
+        return result;
+    }
 }
 

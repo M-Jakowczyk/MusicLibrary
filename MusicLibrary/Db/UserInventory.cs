@@ -38,13 +38,15 @@ public class UserInventory
         var query = $"SELECT * FROM Users WHERE Email = '{email}'";
         var result = SelectFromDb(query);
 
-        return result[0];
+        if (result.Length > 0) return result[0];
+        else return null;
     }
 
     public bool ComparePasswords(string email, string inputPass)
     {
         var user = GetUserByEmail(email);
-        return user.Password == inputPass;
+        if (user != null) return user.Password == inputPass;
+        else return false;
     }
 
     public bool UserExistByEmail(string email)

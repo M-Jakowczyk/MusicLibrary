@@ -2,10 +2,14 @@ namespace MusicLibrary.Models;
 
 public class User
 {
-    public User(string email, string password, UserType userType)
+    public User(string email, string password)
     {
         Email = email;
         Password = password;
+    }
+    public User(string email, string password, UserType userType)
+        : this(email, password)
+    {
         UserType = userType;
     }
 
@@ -19,4 +23,5 @@ public class User
     public string Email { get; }
     public string Password { get; }
     public UserType UserType { get; }
+    private int[] SongIDs { get; }
 }

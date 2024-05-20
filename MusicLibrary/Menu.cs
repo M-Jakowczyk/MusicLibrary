@@ -29,12 +29,43 @@ namespace MusicLibrary
 
         public void UserMenu() 
         {
+            int userOption;
             string title = "User menu";
-            string[] options = { "Get all songs", "Add new song", "Edit song", "Find songs", "Log out" };
-            if (_loggedUser.UserType == UserType.Admin) 
-                Array.Copy(options, new string[]{ "Get all users", "Add new user", "Edit user", "Delete user", "Find user", "Log out" }, options.Length);
+            string[] options = { "Get all songs", "Add new song", "Edit song", "Delete song", "Log out" };
+
+            if (_loggedUser.UserType == UserType.Admin)
+            {
+                AdminMenu();
+            }
+            else
+            {
+                userOption = ShowOptions(title, options);
+                SongModify(userOption);
+            }
+        }
+
+        private void AdminMenu()
+        {
+            string title = "Admin menu";
+            string[] options = { "Song modify", "User modify", "Log out" };
             var userOption = ShowOptions(title, options);
-            UserOptions(userOption);
+            Console.Clear();
+            if (userOption == 1)
+            {
+                string[] songOptions = { "Get all songs", "Add new song", "Edit song", "Delete song", "Return" };
+                userOption = ShowOptions("Song modify", songOptions);
+                SongModify(userOption);
+            }
+            else if (userOption == 2)
+            {
+                string[] userOptions = { "Get all users", "Add new user", "Edit user", "Delete user", "Find user", "Return" };
+                userOption = ShowOptions("User modify", userOptions);
+                UserModify(userOption);
+            }
+            else
+            {
+                if (ReturnToMenu()) MainMenu();
+            }
         }
 
         private int ShowOptions(string nameMenu, string[] options)
@@ -57,30 +88,88 @@ namespace MusicLibrary
             return userOption;
         }
 
-        private void UserOptions(int userOption)
+        private void SongModify(int userOption)
         {
            
             switch (userOption)
             {
                 case 1:
                     WriteLine("All your songs: ");
-                    _songController.ShowAllSongs();
+                    _songController.ShowSongs();
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
                     break;
                 case 2:
                     WriteLine("Add new song: ");
+                    _songController.AddNewSong(_loggedUser);
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
                     break;
                 case 3:
+                    WriteLine("Edit song: ");
+                    _songController.EditSong();
+                    Console.ReadKey();
+                    Console.Clear();
+                    UserMenu();
+                    break;
+                case 4:
+                    WriteLine("Delete song: ");
+                    _songController.RemoveSong();
+                    Console.ReadKey();
+                    Console.Clear();
+                    UserMenu();
+                    break;
+                case 5:
                     break;
                 default:
                     WriteLine("No such option"); break;
             }
-            if (userOption != 3)
+            if (userOption != 5)
+            {
+                if (ReturnToMenu()) MainMenu();
+            }
+        }
+
+        private void UserModify(int userOption)
+        {
+           switch (userOption)
+            {
+                case 1:
+                    WriteLine("All users list: ");
+                    _userController.ShowAllUsers();
+                    Console.ReadKey();
+                    Console.Clear();
+                    UserMenu();
+                    break;
+                case 2:
+                    WriteLine("Add new user: ");
+                    _userController.AddUser();
+                    Console.ReadKey();
+                    Console.Clear();
+                    UserMenu();
+                    break;
+                case 3:
+                    WriteLine("Edit user: ");
+                    _userController.Edit();
+                    Console.ReadKey();
+                    Console.Clear();
+                    UserMenu();
+                    break;
+                case 4:
+                    WriteLine("Delete user: ");
+                    _userController.Remove();
+                    Console.ReadKey();
+                    Console.Clear();
+                    UserMenu();
+                    break;
+                case 5:
+                    break;
+                default:
+                    WriteLine("No such option"); break;
+            }
+            if (userOption != 5)
             {
                 if (ReturnToMenu()) MainMenu();
             }
@@ -88,38 +177,23 @@ namespace MusicLibrary
 
         public void DoOptions(int userOption)
         {
+            Console.Clear();
             switch (userOption)
             {
                 case 1:
-                    WriteLine("You choose \"1\"");
-                    var email = "";
-                    var pass = "";
-                    do
-                    {
-                        Write("Enter your email: ");
-                        email = GetEmailFromUser();
-                        Write("Enter your password: ");
-                        pass = GetPasswordFromUser();
-                        _loggedUser = _userController.Login(email, pass);
-                    } while (_loggedUser == null);
+                    WriteLine("Log in: ");
+                    var user = _userController.EnterUserData();
+                    _loggedUser = _userController.Login(user.Email, user.Password);
                     Console.Clear();
-                    UserMenu();
+                    if (_loggedUser != null) UserMenu();
+                    else MainMenu();
                     break;
                 case 2:
-                    WriteLine("You choose \"2\"");
-                    var flag = true;
-                    do
-                    {
-                        Write("Enter your email: ");
-                        email = GetEmailFromUser();
-                        Write("Enter your password: ");
-                        pass = GetPasswordFromUser();
-                        var userType = GetUserTypeFromUser();
-                        _loggedUser = new User(email, pass, userType);
-                        flag = !_userController.Registration(_loggedUser);
-                    } while (flag);
+                    WriteLine("Registration: ");
+                    _loggedUser = _userController.AddUser();
                     Console.Clear();
-                    UserMenu();
+                    if (_loggedUser != null) UserMenu();
+                    else MainMenu();
                     break;
                 case 3:
                     break;
@@ -132,40 +206,7 @@ namespace MusicLibrary
             }
         }
 
-        private UserType GetUserTypeFromUser()
-        {
-            WriteLine("Select user type by number:");
-            var values = Enum.GetValues(typeof(UserType));
-            foreach (UserType type in values)
-            {
-                WriteLine($"[{(int)type}] - {type}");
-            }
-            string s = ReadLine();
-            int.TryParse(s, out int intType);
-            return (UserType)intType;
-        }
-
-        private string GetPasswordFromUser()
-        {
-            string userString = null;
-            do
-            {
-                userString = ReadLine();
-            } while (!isPasswordValid(userString));
-
-            return userString;
-        }
-
-        private string GetEmailFromUser()
-        {
-            string userString = null;
-            do
-            {
-                userString = ReadLine();
-            } while (!isValid(userString));
-            
-            return userString;
-        }
+        
 
         private static bool ReturnToMenu()
         {
@@ -178,35 +219,7 @@ namespace MusicLibrary
             return (YorN.ToLower() == "y");
         }
 
-        private static bool isValid(string email)
-        {
-            if (email != null)
-            {
-                Regex regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
-                Match match = regex.Match(email);
-                if (match.Success)
-                {
-                    WriteLine(email + " is correct");
-                    return true;
-                }
-            }
-            WriteLine(email + " is incorrect");
-            return false;
-        }
-
-        private static bool isPasswordValid(string password)
-        {
-            if (password != null)
-            {
-                if (password.Length >= 8)
-                {
-                    WriteLine("password is correct");
-                    return true;
-                }
-            }
-            WriteLine("password is incorrect. Too short, at least 8 characters needed");
-            return false;
-        }
+        
     }
 
 }
