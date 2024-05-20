@@ -1,5 +1,5 @@
-﻿using Azure;
-using MusicLibrary.Controllers;
+﻿using MusicLibrary.Controllers;
+using MusicLibrary.Db;
 using MusicLibrary.Models;
 using System;
 using System.Collections.Generic;
@@ -13,32 +13,35 @@ namespace MusicLibrary
 {
     public class Menu
     {
-        public int userOption { get; private set; }
-        private User _user;
+        private User _loggedUser;
        // private string[] options;
-        private static UserController _controller = new UserController();
+        private static UserController _userController = new UserController();
+        private static SongController _songController = new SongController();
+
         
         public void MainMenu()
         {
             string title = "Main menu";
             string[] options = { "Log in", "Sign up", "Exit" };
-            userOption = ShowOptions(title, options);
-            DoOptions();
+            var userOption = ShowOptions(title, options);
+            DoOptions(userOption);
         }
 
         public void UserMenu() 
         {
             string title = "User menu";
             string[] options = { "Get all songs", "Add new song", "Edit song", "Find songs", "Log out" };
-            if (_user.UserType == UserType.Admin) 
+            if (_loggedUser.UserType == UserType.Admin) 
                 Array.Copy(options, new string[]{ "Get all users", "Add new user", "Edit user", "Delete user", "Find user", "Log out" }, options.Length);
-            userOption = ShowOptions(title, options);
+            var userOption = ShowOptions(title, options);
+            UserOptions(userOption);
         }
 
         private int ShowOptions(string nameMenu, string[] options)
         {
+            int userOption;
             WriteLine($"---[ {nameMenu} ]---");
-            if (_user != null) { WriteLine($"Current user login [{_user.Email}]"); }
+            if (_loggedUser != null) { WriteLine($"Current user login [{_loggedUser.Email}]"); }
             do
             {
                 int i = 1;
@@ -54,7 +57,36 @@ namespace MusicLibrary
             return userOption;
         }
 
-        public void DoOptions()
+        private void UserOptions(int userOption)
+        {
+           
+            switch (userOption)
+            {
+                case 1:
+                    WriteLine("All your songs: ");
+                    _songController.ShowAllSongs();
+                    Console.ReadKey();
+                    Console.Clear();
+                    UserMenu();
+                    break;
+                case 2:
+                    WriteLine("Add new song: ");
+                    Console.ReadKey();
+                    Console.Clear();
+                    UserMenu();
+                    break;
+                case 3:
+                    break;
+                default:
+                    WriteLine("No such option"); break;
+            }
+            if (userOption != 3)
+            {
+                if (ReturnToMenu()) MainMenu();
+            }
+        }
+
+        public void DoOptions(int userOption)
         {
             switch (userOption)
             {
@@ -68,8 +100,9 @@ namespace MusicLibrary
                         email = GetEmailFromUser();
                         Write("Enter your password: ");
                         pass = GetPasswordFromUser();
-                        _user = _controller.Login(email, pass);
-                    } while (_user == null);
+                        _loggedUser = _userController.Login(email, pass);
+                    } while (_loggedUser == null);
+                    Console.Clear();
                     UserMenu();
                     break;
                 case 2:
@@ -82,9 +115,10 @@ namespace MusicLibrary
                         Write("Enter your password: ");
                         pass = GetPasswordFromUser();
                         var userType = GetUserTypeFromUser();
-                        var user = new User(email, pass, userType);
-                        flag = !_controller.Registration(user);
+                        _loggedUser = new User(email, pass, userType);
+                        flag = !_userController.Registration(_loggedUser);
                     } while (flag);
+                    Console.Clear();
                     UserMenu();
                     break;
                 case 3:
@@ -92,7 +126,7 @@ namespace MusicLibrary
                 default:
                     WriteLine("No such option"); break;
             }
-            if (userOption != 6)
+            if (userOption != 3)
             {
                 if (ReturnToMenu()) MainMenu();
             }
@@ -143,15 +177,6 @@ namespace MusicLibrary
             } while (!(YorN.ToLower() == "y" || YorN.ToLower() == "n"));
             return (YorN.ToLower() == "y");
         }
-
-        //private static bool isNull(string userString) {
-        //    if (userString == null)
-        //    {
-        //        Write($"Enter value '{userString}' is null!");
-        //        return true;
-        //    }
-        //    return false;
-        //}
 
         private static bool isValid(string email)
         {
