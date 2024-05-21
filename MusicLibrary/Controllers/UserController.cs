@@ -17,38 +17,50 @@ namespace MusicLibrary.Controllers
         {
             var result = _inventory.ComparePasswords(email, pass);
             if (result) return _inventory.GetUserByEmail(email);
+            else
+            {
+                Console.WriteLine("Invalid e-mail or password. Please try again.");
+                Console.ReadKey();
+            }
             return null;
         }
 
         public bool Registration(User user)
         {
-            if (!_inventory.UserExistByEmail(user.Email))
+            if (_inventory.UserExistByEmail(user.Email))
+            {
+                Console.WriteLine("There is already a user on the provided e-mail address");
+                Console.ReadKey();
+                return false;
+            }
+            else
             {
                 _inventory.CreateNewUser(user);
                 return true;
             }
-            else
-            {
-                Console.WriteLine("There is already a user on the provided e-mail address");
-                return false;
-            }
+        }
+
+        public User LogOut()
+        {
+            return null;
         }
 
         public User EnterUserData()
         {
-            Console.Write("Enter email: ");
-            var email = GetEmailFromUser();
-            Console.Write("Enter password: ");
-            var pass = GetPasswordFromUser();
+            var email = GetEmailFromUser("Enter email: ");
+            var pass = GetPasswordFromUser("Enter password: ");
 
             return new User(email, pass);
         }
         public User EnterUserData(bool GetType)
         {
-            Console.Write("Enter email: ");
-            var email = GetEmailFromUser();
-            Console.Write("Enter password: ");
-            var pass = GetPasswordFromUser();
+            string pass, pass2;
+            var email = GetEmailFromUser("Enter email: ");
+            do {
+                pass = GetPasswordFromUser("Enter password: ");
+                pass2 = GetPasswordFromUser("Enter password again: ");
+                if (!pass.Equals(pass2)) Console.WriteLine("Passwords are not equal");
+            } while((!pass.Equals(pass2)) || (pass == ""));
             var userType = GetUserTypeFromUser();
 
             return new User(email, pass, userType);
@@ -74,25 +86,25 @@ namespace MusicLibrary.Controllers
             return (UserType)intType;
         }
 
-        private string GetPasswordFromUser()
+        private string GetPasswordFromUser(String text)
         {
             string userString = null;
             do
             {
+                Console.WriteLine(text);
                 userString = Console.ReadLine();
             } while (!isPasswordValid(userString));
-
             return userString;
         }
 
-        private string GetEmailFromUser()
+        private string GetEmailFromUser(String text)
         {
             string userString = null;
             do
             {
+                Console.WriteLine(text);
                 userString = Console.ReadLine();
             } while (!isValid(userString));
-
             return userString;
         }
 
@@ -104,7 +116,7 @@ namespace MusicLibrary.Controllers
                 Match match = regex.Match(email);
                 if (match.Success)
                 {
-                    Console.WriteLine(email + " is correct");
+                    //Console.WriteLine(email + " is correct");
                     return true;
                 }
             }
@@ -116,13 +128,13 @@ namespace MusicLibrary.Controllers
         {
             if (password != null)
             {
-                if (password.Length >= 8)
+                if (password.Length >= 5)
                 {
-                    Console.WriteLine("password is correct");
+                    //Console.WriteLine("password is correct");
                     return true;
                 }
             }
-            Console.WriteLine("password is incorrect. Too short, at least 8 characters needed");
+            Console.WriteLine("password is incorrect. Too short, at least 5 characters needed");
             return false;
         }
 

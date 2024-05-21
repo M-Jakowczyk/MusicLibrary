@@ -58,13 +58,15 @@ namespace MusicLibrary
             }
             else if (userOption == 2)
             {
-                string[] userOptions = { "Get all users", "Add new user", "Edit user", "Delete user", "Find user", "Return" };
+                string[] userOptions = { "Get all users", "Add new user", "Edit user", "Delete user", "Return" };
                 userOption = ShowOptions("User modify", userOptions);
                 UserModify(userOption);
             }
             else
             {
+                _loggedUser = null;
                 if (ReturnToMenu()) MainMenu();
+                return;
             }
         }
 
@@ -82,9 +84,9 @@ namespace MusicLibrary
                     i++;
                 }
                 WriteLine($"Enter a value (from 1 to {options.Length}): ");
-                userOption = int.Parse(ReadLine());
+                int.TryParse(ReadLine(), out userOption);
 
-            } while (userOption > options.Length || userOption <= 0);
+            } while (userOption > options.Length | userOption <= 0);
             return userOption;
         }
 
@@ -99,36 +101,47 @@ namespace MusicLibrary
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
-                    break;
+                    return;
                 case 2:
                     WriteLine("Add new song: ");
                     _songController.AddNewSong(_loggedUser);
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
-                    break;
+                    return;
                 case 3:
                     WriteLine("Edit song: ");
                     _songController.EditSong();
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
-                    break;
+                    return;
                 case 4:
                     WriteLine("Delete song: ");
                     _songController.RemoveSong();
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
-                    break;
+                    return;
                 case 5:
-                    break;
+                    Console.Clear();
+                    if(_loggedUser.UserType == UserType.Admin) AdminMenu();
+                    else 
+                    {
+                        _loggedUser = null;
+                        if (ReturnToMenu()) MainMenu();
+                    }
+                    return;
                 default:
                     WriteLine("No such option"); break;
             }
             if (userOption != 5)
             {
-                if (ReturnToMenu()) MainMenu();
+                if (ReturnToMenu()) 
+                {
+                    if (_loggedUser.UserType == UserType.Admin) AdminMenu();
+                    UserMenu();
+                }
             }
         }
 
@@ -142,36 +155,38 @@ namespace MusicLibrary
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
-                    break;
+                    return;
                 case 2:
                     WriteLine("Add new user: ");
                     _userController.AddUser();
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
-                    break;
+                    return;
                 case 3:
                     WriteLine("Edit user: ");
                     _userController.Edit();
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
-                    break;
+                    return;
                 case 4:
                     WriteLine("Delete user: ");
                     _userController.Remove();
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
-                    break;
+                    return;
                 case 5:
-                    break;
+                    Console.Clear();
+                    AdminMenu();
+                    return;
                 default:
                     WriteLine("No such option"); break;
             }
             if (userOption != 5)
             {
-                if (ReturnToMenu()) MainMenu();
+                if (ReturnToMenu()) AdminMenu();
             }
         }
 
@@ -187,16 +202,18 @@ namespace MusicLibrary
                     Console.Clear();
                     if (_loggedUser != null) UserMenu();
                     else MainMenu();
-                    break;
+                    return;
                 case 2:
                     WriteLine("Registration: ");
                     _loggedUser = _userController.AddUser();
                     Console.Clear();
                     if (_loggedUser != null) UserMenu();
                     else MainMenu();
-                    break;
+                    return;
                 case 3:
-                    break;
+                    Console.WriteLine("Goodbye!");
+                    Console.ReadKey();
+                    return;
                 default:
                     WriteLine("No such option"); break;
             }
@@ -213,9 +230,9 @@ namespace MusicLibrary
             string YorN;
             do
             {
-                WriteLine("Want to return to the main menu? (Y/N):");
+                WriteLine("Do you want to return to the menu? (Y/N):");
                 YorN = ReadLine();
-            } while (!(YorN.ToLower() == "y" || YorN.ToLower() == "n"));
+            } while (!(YorN.ToLower() == "y" | YorN.ToLower() == "n"));
             return (YorN.ToLower() == "y");
         }
 
