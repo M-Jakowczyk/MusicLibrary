@@ -9,7 +9,8 @@ namespace MusicLibrary.Db
 {
     public class SetupDb
     {
-        private static string _connectionString = "Server=ROG; Database=MusicLibrary; Trusted_Connection=true;";
+        private static string _connectionString = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "_connectionString.txt");
+        //private static string _connectionString = "Server=ROG; Database=MusicLibrary; Trusted_Connection=true;";
 
         public static void Start()
         {

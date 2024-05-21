@@ -5,7 +5,8 @@ namespace MusicLibrary.Db;
 
 public class SongInventory
 {
-    private string _connectionString = "Server=ROG;Database=MusicLibrary;Trusted_Connection=True;";
+    private string _connectionString = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "_connectionString.txt");
+    //private string _connectionString = "Server=ROG;Database=MusicLibrary;Trusted_Connection=True;";
 
     public int AddNewSongToDb(Song song)
     {
