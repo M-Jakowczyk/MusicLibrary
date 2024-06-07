@@ -52,8 +52,7 @@ namespace MusicLibrary.Db
                 "Title nvarchar(255) NOT NULL, " +
                 "Author nvarchar(255) NOT NULL, " +
                 "Album nvarchar(255) NOT NULL, " +
-                "[Year] int, " +
-                "UsersId int) " +
+                "[Year] int) " +
                 "END;";
             string query3 = "IF OBJECT_ID(N'UserSongs', N'U') IS NULL " +
                 "BEGIN  PRINT 'Table NOT Exists' " +

@@ -205,7 +205,8 @@ namespace MusicLibrary
                     return;
                 case 2:
                     WriteLine("Registration: ");
-                    _loggedUser = _userController.AddUser();
+                    var newUser = _userController.AddUser();
+                    _loggedUser = _userController.Login(newUser.Email, newUser.Password);
                     Console.Clear();
                     if (_loggedUser != null) UserMenu();
                     else MainMenu();
