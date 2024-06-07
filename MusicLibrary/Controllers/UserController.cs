@@ -12,7 +12,11 @@ namespace MusicLibrary.Controllers
     public class UserController
     {
         private static UserInventory _inventory = new UserInventory();
-        
+
+        public UserController()
+        {
+        }
+
         public User Login(string email, string pass)
         {
             var result = _inventory.ComparePasswords(email, pass);
@@ -148,12 +152,19 @@ namespace MusicLibrary.Controllers
 
         internal void Edit()
         {
-            throw new NotImplementedException();
+            ShowAllUsers();
+            Console.WriteLine("Choose user to edit (by Id):");
+            int.TryParse(Console.ReadLine(), out var userId);
+            var updatedUser = EnterUserData(true);
+            _inventory.UpdateUser(updatedUser, userId);
         }
 
         internal void Remove()
         {
-            throw new NotImplementedException();
+            ShowAllUsers();
+            Console.WriteLine("Choose user to delete (by Id):");
+            int.TryParse(Console.ReadLine(), out var userId);
+            _inventory.DeleteById(userId);
         }
     }
 }

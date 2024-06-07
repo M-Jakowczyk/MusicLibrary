@@ -23,5 +23,4 @@ public class User
     public string Email { get; }
     public string Password { get; }
     public UserType UserType { get; }
-    private int[] SongIDs { get; }
 }

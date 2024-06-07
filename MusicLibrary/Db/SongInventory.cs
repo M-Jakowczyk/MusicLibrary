@@ -144,7 +144,7 @@ public class SongInventory
             sqlConnection.Open();
 
             var sqlCommand = new SqlCommand(query, sqlConnection);
-            if (parameters != null)
+            if (parameters.Length > 0)
             {
                 sqlCommand.Parameters.AddRange(parameters);
             }
@@ -160,7 +160,7 @@ public class SongInventory
         sqlConnection.Open();
 
         var sqlCommand = new SqlCommand(query, sqlConnection);
-        if (parameters != null)
+        if (parameters.Length > 0)
         {
             sqlCommand.Parameters.AddRange(parameters);
         }
