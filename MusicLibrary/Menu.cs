@@ -97,7 +97,7 @@ namespace MusicLibrary
             {
                 case 1:
                     WriteLine("All your songs: ");
-                    _songController.ShowSongs();
+                    _songController.ShowSongs(_loggedUser);
                     Console.ReadKey();
                     Console.Clear();
                     UserMenu();
@@ -105,21 +105,21 @@ namespace MusicLibrary
                 case 2:
                     WriteLine("Add new song: ");
                     _songController.AddNewSong(_loggedUser);
-                    Console.ReadKey();
+                    // Console.ReadKey();
                     Console.Clear();
                     UserMenu();
                     return;
                 case 3:
                     WriteLine("Edit song: ");
-                    _songController.EditSong();
-                    Console.ReadKey();
+                    _songController.EditSong(_loggedUser);
+                    // Console.ReadKey();
                     Console.Clear();
                     UserMenu();
                     return;
                 case 4:
                     WriteLine("Delete song: ");
-                    _songController.RemoveSong();
-                    Console.ReadKey();
+                    _songController.RemoveSong(_loggedUser);
+                    // Console.ReadKey();
                     Console.Clear();
                     UserMenu();
                     return;
@@ -159,21 +159,21 @@ namespace MusicLibrary
                 case 2:
                     WriteLine("Add new user: ");
                     _userController.AddUser();
-                    Console.ReadKey();
+                    // Console.ReadKey();
                     Console.Clear();
                     UserMenu();
                     return;
                 case 3:
                     WriteLine("Edit user: ");
                     _userController.Edit();
-                    Console.ReadKey();
+                    // Console.ReadKey();
                     Console.Clear();
                     UserMenu();
                     return;
                 case 4:
                     WriteLine("Delete user: ");
                     _userController.Remove();
-                    Console.ReadKey();
+                    // Console.ReadKey();
                     Console.Clear();
                     UserMenu();
                     return;

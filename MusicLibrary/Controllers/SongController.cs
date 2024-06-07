@@ -14,9 +14,13 @@ namespace MusicLibrary.Controllers
     {
         private static SongInventory _songInventory = new SongInventory();
 
-        public void ShowSongs()
+        public void ShowSongs(User user)
         {
-            foreach (var song in _songInventory.GetAllSongs())
+            var songs = (user.UserType == UserType.Admin)
+                ? _songInventory.GetAllSongs()
+                : _songInventory.GetSongsByUser(user.Id);
+
+            foreach (var song in songs)
             {
                 Console.WriteLine($"[{song.Id}] {song.Title} - {song.Author} ({song.Year}) /{song.Album}/");
             }
@@ -32,37 +36,94 @@ namespace MusicLibrary.Controllers
 
         public void AddNewSong(User user) {
             var newSong = EnterSongData();
-            var songID = _songInventory.AddNewSongToDb(newSong);
+            int songID = _songInventory.GetSongID(newSong);
+            if (songID < 0)
+            {
+                songID = _songInventory.AddNewSongToDb(newSong);
+            }
             _songInventory.AssignSongToUser(user.Id, songID);
         }
-        public void RemoveSong() 
+        public void RemoveSong(User user) 
         {
-            var song = FindSong("remove");
-            _songInventory.DeleteSongByID(song.Id);
+            var song = FindSong("remove", user);
+            if (song != null)
+            {
+                _songInventory.RemoveAssignSongToUser(user.Id,song.Id);
+                _songInventory.DeleteSongByID(song.Id);
+            }
         }
-        public void EditSong() 
+        public void EditSong(User user) 
         {
-            var song = FindSong("edit");
+            var song = FindSong("edit", user);
+            if (song != null)
+            {
+                Console.WriteLine("Enter new data for this song:");
+                var newSong = EnterSongData();
+                _songInventory.UpdateSong(newSong, song.Id);
+            }
+        }
+        public Song FindSong(string option, User user)
+        {
+            int songId=-1;
+            var songsId = Array.Empty<int>();
+            Song[] songs = Array.Empty<Song>();
 
-            Console.WriteLine("Enter new data for this song:");
-            var newSong = EnterSongData();
-            _songInventory.UpdateSong(newSong, song.Id);
-        }
-        public Song FindSong(string option)
-        {
-            int songID;
-            Song song;
             do
             {
-                Console.WriteLine($"Enter the ID of the song you want to {option}:");
-                songID = int.Parse(Console.ReadLine());
-                song = _songInventory.GetSongByID(songID);
-                Console.WriteLine("is this the song?");
-                Console.WriteLine($"[{song.Id}] {song.Title} - {song.Author} ({song.Year}) /{song.Album}/");
-            } while (!YesOrNo());
-            return song;
-        }
+                Console.WriteLine("Search for songs:");
+                var searchString = Console.ReadLine();
+                if (searchString.Length > 0)
+                {
+                    songs = user.UserType == UserType.Admin 
+                        ? _songInventory.SearchSongs(searchString) 
+                        : SearchSongsByUser(searchString, user.Id);
+                }
 
+                if (songs.Length > 0)
+                {
+                    foreach (var song in songs)
+                    {
+                        Console.WriteLine($"[{song.Id}] {song.Title} - {song.Author} ({song.Year}) /{song.Album}/");
+                        Array.Resize(ref songsId, songsId.Length + 1);
+                        songsId[songsId.Length - 1] = song.Id;
+                    }
+
+                    string input;
+                    do
+                    {
+                        Console.WriteLine($"Enter the ID of the song you want to {option}:");
+                        input = Console.ReadLine();
+                        int.TryParse(input, out songId);
+                    } while (!songsId.Contains(songId));
+                    
+                    return _songInventory.GetSongByID(songId);
+                }
+                else
+                {
+                    Console.WriteLine("Nothing found");
+                    Console.WriteLine("You want to try again?");
+                    if (!YesOrNo()) break;
+                }
+            } while (songs.Length <= 0); 
+            return null;
+        }
+        
+        public Song[] SearchSongsByUser(string searchString, int userId)
+        {
+            var userSongs = _songInventory.GetSongsByUser(userId);
+            var foundSongs = Array.Empty<Song>();
+            searchString = searchString.ToLower();
+            foreach (var song in userSongs)
+            {
+                if (song.Title.ToLower().Contains(searchString) || song.Author.ToLower().Contains(searchString) || song.Album.ToLower().Contains(searchString))
+                {
+                    Array.Resize(ref foundSongs, foundSongs.Length + 1);
+                    foundSongs[foundSongs.Length - 1] = song;
+                }
+            }
+            return foundSongs;
+        }
+        
         private Song EnterSongData()
         {
             Console.WriteLine("Enter song title: ");
@@ -71,8 +132,12 @@ namespace MusicLibrary.Controllers
             var artist = Console.ReadLine();
             Console.WriteLine("Enter song album: ");
             var album = Console.ReadLine();
-            Console.WriteLine("Enter song year: ");
-            var year = int.Parse(Console.ReadLine());
+            int year;
+            do
+            {
+                Console.WriteLine("Enter song year: ");
+            } while (!int.TryParse(Console.ReadLine(), out year));
+
             return new Song(title, artist, album, year);
         }
 

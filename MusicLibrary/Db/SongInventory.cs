@@ -23,7 +23,7 @@ public class SongInventory
         return GetSongID(song);
     }
 
-    private int GetSongID(Song song)
+    public int GetSongID(Song song)
     {
         var query = "SELECT * FROM Songs WHERE (Title = @Title AND Author = @Author AND Album = @Album AND Year = @Year )";
         var parameters = new[]
@@ -33,11 +33,13 @@ public class SongInventory
             new SqlParameter("@Album", SqlDbType.VarChar) { Value = song.Album },
             new SqlParameter("@Year", SqlDbType.Int) { Value = song.Year }
         };
-        return SelectFromDb(query, parameters)[0].Id;
+        var songs = SelectFromDb(query, parameters);
+        var result = (songs.Length <= 0) ? -1 : songs[0].Id;
+        return result;
     }
     public Song GetSongByID(int id)
     {
-        var query = "SELECT * FROM Songs WHERE ID = @Id";
+        var query = "SELECT * FROM Songs WHERE Id = @Id";
         var parameters = new[]
         {
             new SqlParameter("@Id", SqlDbType.VarChar) { Value = id}
@@ -46,7 +48,7 @@ public class SongInventory
     }
     public void DeleteSongByID(int songID)
     {
-        var query = $"DELETE FROM Songs WHERE ID = @songID;";
+        var query = $"DELETE FROM Songs WHERE Id = @songID;";
         var parameters = new[]
         {
             new SqlParameter("@songID", SqlDbType.VarChar) { Value = songID}
@@ -56,7 +58,7 @@ public class SongInventory
 
     public void UpdateSong(Song song, int songID)
     {
-        var query = $"UPDATE Users SET Title = @Title, Author = @Author, Album = @Album, Year = @Year WHERE Id = @songID; ";
+        var query = "UPDATE Songs SET Title = @Title, Author = @Author, Album = @Album, Year = @Year WHERE Id = @songID; ";
         var parameters = new[]
         {
             new SqlParameter("@Title", SqlDbType.VarChar) { Value = song.Title },
@@ -66,6 +68,20 @@ public class SongInventory
             new SqlParameter("@songID", SqlDbType.Int) { Value = songID }
         };
         ChangeDb(query, parameters);
+    }
+    
+    public Song[] SearchSongs(string searchString)
+    {
+        var query = "SELECT * FROM Songs WHERE Title LIKE @SearchString " 
+                    + "OR Author LIKE @SearchString "
+                    + "OR Album LIKE @SearchString";
+    
+        var parameters = new[]
+        {
+            new SqlParameter("@SearchString", SqlDbType.NVarChar) { Value = "%" + searchString + "%" }
+        };
+
+        return SelectFromDb(query, parameters);
     }
 
     public Song[] GetAllSongs()
@@ -78,8 +94,7 @@ public class SongInventory
 
     public Song[] GetSongsByUser(int userId)
     {
-        string query = @"
-                        SELECT Songs.Id, Songs.Title, Songs.Author, Songs.Album, Songs.Year
+        string query = @"SELECT Songs.Id, Songs.Title, Songs.Author, Songs.Album, Songs.Year
                         FROM Songs
                         INNER JOIN UserSongs ON Songs.Id = UserSongs.SongId
                         WHERE UserSongs.UserId = @UserId";
@@ -100,6 +115,16 @@ public class SongInventory
         };
         ChangeDb(query, parameters);
     }
+    public void RemoveAssignSongToUser(int userId, int songId)
+    {
+        string query = "DELETE FROM UserSongs WHERE UserId = @UserId AND SongId = @SongId";
+        var parameters = new[]
+        {
+            new SqlParameter("@UserId", SqlDbType.Int) { Value = userId },
+            new SqlParameter("@SongId", SqlDbType.Int) { Value = songId }
+        };
+        ChangeDb(query, parameters);
+    }
 
     // public Song[] GetSongsByAuthor(string authorInDb)
     // {
@@ -112,17 +137,6 @@ public class SongInventory
     //
     //     return result.ToArray();
     // }
-
-    internal Song[] GetSongsByUser(int[] songIDs)
-    {
-        var query = $"SELECT * FROM Songs WHERE ID IN @songIDs ";
-        var parameters = new[]
-        {
-            new SqlParameter("@songIDs", SqlDbType.VarChar) { Value = songIDs}
-        };
-        var result = SelectFromDb(query, parameters);
-        return result.ToArray();
-    }
 
     private void ChangeDb(string query, SqlParameter[] parameters)
         {
@@ -157,10 +171,11 @@ public class SongInventory
         {
             var id = reader["Id"].ToString();
             var title = reader["Title"].ToString();
-            var year = reader["Year"].ToString();
             var author = reader["Author"].ToString();
+            var album = reader["Album"].ToString();
+            var year = reader["Year"].ToString();
 
-            var song = new Song(int.Parse(id), title, author, "", int.Parse(year));
+            var song = new Song(int.Parse(id), title, author, album, int.Parse(year));
 
             Array.Resize(ref result, result.Length + 1);
             result[result.Length - 1] = song;
