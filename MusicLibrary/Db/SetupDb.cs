@@ -40,7 +40,7 @@ namespace MusicLibrary.Db
             string query = "IF OBJECT_ID(N'Users', N'U') IS NULL " +
                 "BEGIN PRINT 'Table NOT Exists' " +
                 "CREATE TABLE Users " +
-                "(ID int PRIMARY KEY IDENTITY, " +
+                "(Id int PRIMARY KEY IDENTITY, " +
                 "Email nvarchar(255) NOT NULL, " +
                 "Password nvarchar(255) NOT NULL, " +
                 "Type int NOT NULL) " +
@@ -48,16 +48,25 @@ namespace MusicLibrary.Db
             string query2 = "IF OBJECT_ID(N'Songs', N'U') IS NULL " +
                 "BEGIN  PRINT 'Table NOT Exists' " +
                 "CREATE TABLE Songs " +
-                "(ID int PRIMARY KEY IDENTITY, " +
+                "(Id int PRIMARY KEY IDENTITY, " +
                 "Title nvarchar(255) NOT NULL, " +
                 "Author nvarchar(255) NOT NULL, " +
                 "Album nvarchar(255) NOT NULL, " +
                 "[Year] int, " +
                 "UsersId int) " +
                 "END;";
-
+            string query3 = "IF OBJECT_ID(N'UserSongs', N'U') IS NULL " +
+                "BEGIN  PRINT 'Table NOT Exists' " +
+                "CREATE TABLE UserSongs " +
+                "(UserId int NOT NULL, " +
+                "SongId int NOT NULL, " +
+                "PRIMARY KEY (UserId, SongId), " +
+                "FOREIGN KEY (UserId) REFERENCES Users(Id), " +
+                "FOREIGN KEY (SongId) REFERENCES Songs(Id)) " +
+                "END;";
             ChangDb(query);
             ChangDb(query2);
+            ChangDb(query3);
         }
 
         private static void LoadTestData()

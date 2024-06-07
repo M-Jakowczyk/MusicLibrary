@@ -33,6 +33,7 @@ namespace MusicLibrary.Controllers
         public void AddNewSong(User user) {
             var newSong = EnterSongData();
             var songID = _songInventory.AddNewSongToDb(newSong);
+            _songInventory.AssignSongToUser(user.Id, songID);
         }
         public void RemoveSong() 
         {
@@ -58,7 +59,7 @@ namespace MusicLibrary.Controllers
                 song = _songInventory.GetSongByID(songID);
                 Console.WriteLine("is this the song?");
                 Console.WriteLine($"[{song.Id}] {song.Title} - {song.Author} ({song.Year}) /{song.Album}/");
-            } while (YesOrNo());
+            } while (!YesOrNo());
             return song;
         }
 
